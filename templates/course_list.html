@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-center mb-8">📚 Available Courses</h2>
+
+    {% for course in courses %}
+        <div class="bg-white shadow-md rounded-xl p-6 mb-6 border border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800">{{ course.code }} - {{ course.name }}</h3>
+            <p class="text-gray-600 mt-2">{{ course.description }}</p>
+
+            <div class="mt-4 flex items-center space-x-4">
+                {% if user in course.students.all %}
+                    <span class="text-green-600 font-medium">✅ Enrolled</span>
+                    <a href="{% url 'unenroll_course' course.id %}" class="text-red-600 hover:underline">❌ Unenroll</a>
+                {% else %}
+                    <a href="{% url 'enroll_course' course.id %}" class="text-green-600 hover:underline">✅ Enroll</a>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center text-gray-500">No courses available.</p>
+    {% endfor %}
+
+    <div class="text-center mt-10">
+        <a href="{% url 'home' %}" class="text-blue-600 hover:underline">⬅ Back to Home</a>
+    </div>
+</div>
+{% endblock %}

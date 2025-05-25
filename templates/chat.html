@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-center mb-6">💬 Live Chat</h2>
+
+    <div id="chat-box" class="border border-gray-300 rounded-md h-72 overflow-y-scroll p-4 bg-white shadow-inner mb-4"></div>
+
+    <form id="chat-form" class="flex items-center space-x-2">
+        {% csrf_token %}
+        <input type="text" id="chat-message" placeholder="Type a message..."
+            class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <button type="submit"
+            class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
+            Send
+        </button>
+    </form>
+
+    <div class="text-center mt-8">
+        <a href="{% url 'home' %}" class="text-blue-600 hover:underline">⬅ Back to Home</a>
+    </div>
+</div>
+
+<!-- jQuery + Auto-refresh script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function fetchMessages() {
+        $.get("{% url 'get_messages' %}", function(data) {
+            let box = $('#chat-box');
+            box.html('');
+            data.forEach(msg => {
+                box.append(`<p><strong>${msg.sender}</strong>: ${msg.message} <span class="text-xs text-gray-500">(${msg.timestamp})</span></p>`);
+            });
+            box.scrollTop(box[0].scrollHeight);
+        });
+    }
+
+    fetchMessages();
+    setInterval(fetchMessages, 3000);  // refresh every 3 sec
+
+    $('#chat-form').submit(function(e) {
+        e.preventDefault();
+        let message = $('#chat-message').val();
+        $.post("{% url 'send_message' %}", {
+            'message': message,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        }, function() {
+            $('#chat-message').val('');
+            fetchMessages();
+        });
+    });
+</script>
+{% endblock %}

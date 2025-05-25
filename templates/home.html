@@ -1,19 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>MyCampusConnect</title>
-</head>
-<body>
-    <h1>🎓 Welcome to MyCampusConnect!</h1>
-    <p>This is your homepage.</p>
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-10 rounded-xl shadow-md mt-16 text-center">
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-4">🎓 Welcome to MyCampusConnect!</h1>
+    <p class="text-gray-600 mb-8">Your mini-campus portal for all things student + staff related.</p>
 
     {% if user.is_authenticated %}
-    <p>Hello, {{ user.username }}!</p>
-    <a href="{% url 'logout' %}">Logout</a>
-{% else %}
-    <a href="{% url 'login' %}">Login</a>
-    <a href="{% url 'register' %}">Register</a>
-{% endif %}
+        {% with user.userrole as role %}
+            {% if role.is_teacher %}
+                <a href="{% url 'teacher_panel' %}" 
+                   class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md mb-6 transition">
+                    🧑‍🏫 Teacher Panel
+                </a>
+            {% endif %}
+        {% endwith %}
 
-</body>
-</html>
+        <div class="mb-6 text-gray-700 font-semibold text-lg">
+            👋 Hello, {{ user.username }}!
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'profile' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md transition">
+               👤 My Profile
+            </a>
+            <a href="{% url 'course_list' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md transition">
+               📘 View Courses
+            </a>
+            <a href="{% url 'announcements' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md transition">
+               📢 Announcements
+            </a>
+            <a href="{% url 'chat' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md transition">
+               💬 Live Chat
+            </a>
+            <a href="{% url 'search_users' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md transition">
+               🔍 Search Users
+            </a>
+
+            <form action="{% url 'logout' %}" method="post" class="inline">
+                {% csrf_token %}
+                <button type="submit"
+                    class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md transition cursor-pointer">
+                    🚪 Logout
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <div class="flex justify-center gap-6">
+            <a href="{% url 'login' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition">
+               🔐 Login
+            </a>
+            <a href="{% url 'register' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition">
+               📝 Register
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

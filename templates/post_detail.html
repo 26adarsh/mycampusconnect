@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md mt-12">
+  <h2 class="text-3xl font-bold mb-4">{{ post.title }}</h2>
+  <p class="text-gray-600 mb-6"><strong>Posted by:</strong> {{ post.author.username }}</p>
+  
+  {% if post.image %}
+    <img src="{{ post.image.url }}" alt="Post image" class="w-full max-w-md mb-6 rounded-md object-cover" />
+  {% endif %}
+
+  <p class="mb-6 text-gray-800">{{ post.content }}</p>
+  <hr class="my-6">
+
+  <h3 class="text-2xl font-semibold mb-4">💬 Comments:</h3>
+  <ul class="space-y-4 mb-6">
+    {% for comment in comments %}
+      <li class="border border-gray-200 rounded-md p-4">
+        <p><strong>{{ comment.author.username }}</strong> 
+          <span class="text-sm text-gray-500">({{ comment.created_at|date:"M d, Y H:i" }})</span>
+        </p>
+        <p class="mt-1 text-gray-700">{{ comment.text }}</p>
+      </li>
+    {% empty %}
+      <li class="text-gray-500 italic">No comments yet.</li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="{% url 'add_comment' post.id %}" class="space-y-4">
+    {% csrf_token %}
+    <textarea name="comment" rows="4" placeholder="Write a comment..." 
+      class="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+    <button type="submit" 
+      class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold transition">
+      💬 Post Comment
+    </button>
+  </form>
+
+  <a href="{% url 'announcements' %}" class="inline-block mt-6 text-blue-600 hover:underline">
+    ⬅ Back to Announcements
+  </a>
+</div>
+{% endblock %}
