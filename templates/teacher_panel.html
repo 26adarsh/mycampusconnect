@@ -1,21 +1,78 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-xl mx-auto mt-12 bg-white p-8 rounded-lg shadow-md">
-  <h2 class="text-2xl font-semibold mb-6">🧑‍🏫 Teacher Panel: Post Announcement</h2>
+<div class="max-w-7xl mx-auto px-6 py-8">
+  <h1 class="text-4xl font-bold mb-8">Teacher Panel</h1>
 
-  <form method="post" enctype="multipart/form-data" class="space-y-6">
-    {% csrf_token %}
-    {{ form.as_p|safe }}
-    <button
-      type="submit"
-      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition font-semibold"
-    >
-      📢 Post Announcement
-    </button>
-  </form>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-  <div class="mt-8">
-    <a href="{% url 'home' %}" class="text-blue-600 hover:underline">⬅ Back to Home</a>
+    <!-- Announcements -->
+    <section class="col-span-1 md:col-span-2 bg-white p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-semibold mb-4">Announcements</h2>
+      
+      <form method="post" enctype="multipart/form-data" class="mb-6">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post Announcement</button>
+      </form>
+
+      <ul>
+        {% for post in posts %}
+          <li class="mb-3 border-b border-gray-300 pb-2">
+            <h3 class="font-semibold">{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <small class="text-gray-500">{{ post.created_at }}</small>
+          </li>
+        {% empty %}
+          <li>No announcements yet.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <!-- Student Data -->
+    <section class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-semibold mb-4">Student Data</h2>
+      <ul>
+        {% for student in students %}
+          <li class="mb-2 border-b border-gray-200 pb-1">
+            <p><strong>{{ student.user.username }}</strong> - Roll No: {{ student.roll_no }}, Dept: {{ student.department }}</p>
+          </li>
+        {% empty %}
+          <li>No students found.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+  </div>
+
+  <!-- More sections for Attendance, Meetings, Live Chat, Search -->
+  <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <!-- Placeholder for Attendance -->
+    <section class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-semibold mb-4">Attendance</h2>
+      <p>Attendance management functionality coming soon.</p>
+    </section>
+
+    <!-- Placeholder for Meetings -->
+    <section class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-semibold mb-4">Meetings</h2>
+      <p>Meetings schedule functionality coming soon.</p>
+    </section>
+
+    <!-- Placeholder for Live Chat -->
+    <section class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-2xl font-semibold mb-4">Live Chat</h2>
+      <a href="{% url 'chat' %}" class="text-blue-600 hover:underline">Open Chat</a>
+    </section>
+  </div>
+
+  <!-- Placeholder for Search -->
+  <div class="mt-12 bg-white p-6 rounded-lg shadow">
+    <h2 class="text-2xl font-semibold mb-4">Search</h2>
+    <form method="get" action="{% url 'search_announcements' %}" class="flex items-center space-x-4">
+      <input type="text" name="q" placeholder="Search announcements..." class="border border-gray-300 rounded px-4 py-2 flex-grow">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Search</button>
+    </form>
   </div>
 </div>
 {% endblock %}
