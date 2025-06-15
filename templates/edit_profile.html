@@ -1,31 +1,49 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 {% block content %}
-<style>
-    input[name="name"],
-    input[name="roll_no"],
-    input[name="department"] {
-        border: 2px solid black !important;
-        border-radius: 6px;
-        padding: 8px;
-    }
-</style>
-
 <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-md mt-12">
     <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">✏️ Edit Your Profile</h2>
-    
+
     <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
-        {{ form.as_p|safe }}
-        
-        <button type="submit" 
-            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition-colors">
+
+        <!-- Roll Number -->
+        <div>
+            <label for="{{ form.roll_no.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-700">Roll Number</label>
+            {{ form.roll_no|add_class:"border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500" }}
+            {% if form.roll_no.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.roll_no.errors|striptags }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Department -->
+        <div>
+            <label for="{{ form.department.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-700">Department</label>
+            {{ form.department|add_class:"border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500" }}
+            {% if form.department.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.department.errors|striptags }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Profile Pic Upload (Stylish File Input) -->
+        <div>
+            <label for="{{ form.profile_pic.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-700">Profile Picture</label>
+            <div class="relative">
+                {{ form.profile_pic|add_class:"block w-full text-sm text-gray-700 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition" }}
+            </div>
+            {% if form.profile_pic.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.profile_pic.errors|striptags }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-md transition">
             💾 Save Changes
         </button>
     </form>
 
-    <a href="{% url 'profile' %}" 
-       class="block text-center text-blue-600 hover:underline mt-6">
-       ← Back to Profile
+    <a href="{% url 'profile' %}" class="block text-center text-blue-600 hover:underline mt-6">
+        ← Back to Profile
     </a>
 </div>
 {% endblock %}

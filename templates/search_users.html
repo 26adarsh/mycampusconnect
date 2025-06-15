@@ -1,33 +1,38 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-xl mx-auto mt-12 bg-white p-8 rounded-lg shadow-md">
-  <h2 class="text-2xl font-semibold mb-6">🔍 Search Users</h2>
+<div class="max-w-3xl mx-auto px-6 py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg mt-10">
+  <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">🔍 Search Users</h2>
 
-  <form method="get" class="flex space-x-4 mb-6">
+  <form method="get" class="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-4 sm:space-y-0 mb-8">
     <input
       type="text"
       name="q"
-      placeholder="Search username..."
+      placeholder="Search by username..."
       value="{{ query }}"
-      class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white"
     />
     <button
       type="submit"
-      class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition font-semibold"
-    >
+      class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
       Search
     </button>
   </form>
 
-  <ul class="list-disc list-inside space-y-2 text-gray-700">
-    {% for user in users %}
-      <li class="hover:text-blue-600 transition cursor-pointer">{{ user.username }}</li>
-    {% empty %}
-      <li class="italic text-gray-500">No users found.</li>
-    {% endfor %}
-  </ul>
+  <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+    {% if users %}
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for user in users %}
+          <li class="py-3 hover:bg-blue-50 dark:hover:bg-gray-700 px-2 rounded-md transition">
+            <span class="text-gray-800 dark:text-white font-medium">@{{ user.username }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="italic text-gray-500 text-center">No users found.</p>
+    {% endif %}
+  </div>
 
-  <div class="mt-8">
+  <div class="text-center mt-8">
     <a href="{% url 'home' %}" class="text-blue-600 hover:underline">⬅ Back to Home</a>
   </div>
 </div>

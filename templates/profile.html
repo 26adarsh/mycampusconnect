@@ -1,42 +1,45 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-10 rounded-xl shadow-lg mt-16">
-  
-  <h2 class="text-4xl font-extrabold text-center text-gray-800 mb-10">👤 My Profile</h2>
-  
-  <div class="space-y-8 text-gray-700">
+<div class="max-w-md mx-auto bg-white bg-opacity-20 backdrop-blur-lg p-10 rounded-xl shadow-lg mt-16 border border-gray-200">
+
+  <!-- Profile Picture at the Top -->
+  <div class="flex justify-center mb-8">
+    {% if profile.profile_pic %}
+      <img src="{{ profile.profile_pic.url }}" alt="Profile Picture"
+           class="w-32 h-32 rounded-full object-cover border-4 border-indigo-600 shadow-lg" />
+    {% else %}
+      <div class="w-32 h-32 rounded-full bg-indigo-500 text-white flex items-center justify-center text-4xl font-bold shadow-lg">
+        {{ profile.user.username|first|upper }}
+      </div>
+    {% endif %}
+  </div>
+
+  <h2 class="text-4xl font-extrabold text-center text-gray-800 dark:text-white mb-10">👤 My Profile</h2>
+
+  <div class="space-y-8 text-gray-800 dark:text-gray-100">
     <!-- Username -->
     <div class="flex flex-col">
-      <label class="text-gray-500 font-semibold mb-1 tracking-wide uppercase text-sm">Username</label>
-      <div class="bg-gray-100 border border-gray-300 rounded-lg px-4 py-3 text-lg font-medium text-gray-900">
+      <label class="font-semibold mb-1 tracking-wide uppercase text-sm text-black dark:text-white">Username</label>
+      <div class="bg-gray-100 dark:bg-gray-800 border border-gray-300 rounded-lg px-4 py-3 text-lg font-medium">
         {{ profile.user.username }}
       </div>
     </div>
 
     <!-- Roll Number -->
     <div class="flex flex-col">
-      <label class="text-gray-500 font-semibold mb-1 tracking-wide uppercase text-sm">Roll No</label>
-      <div class="bg-gray-100 border border-gray-300 rounded-lg px-4 py-3 text-lg font-medium text-gray-900">
+      <label class="font-semibold mb-1 tracking-wide uppercase text-sm text-black dark:text-white">Roll No</label>
+      <div class="bg-gray-100 dark:bg-gray-800 border border-gray-300 rounded-lg px-4 py-3 text-lg font-medium">
         {{ profile.roll_no }}
       </div>
     </div>
 
     <!-- Department -->
     <div class="flex flex-col">
-      <label class="text-gray-500 font-semibold mb-1 tracking-wide uppercase text-sm">Department</label>
-      <div class="bg-gray-100 border border-gray-300 rounded-lg px-4 py-3 text-lg font-medium text-gray-900">
+      <label class="font-semibold mb-1 tracking-wide uppercase text-sm text-black dark:text-white">Department</label>
+      <div class="bg-gray-100 dark:bg-gray-800 border border-gray-300 rounded-lg px-4 py-3 text-lg font-medium">
         {{ profile.department }}
       </div>
     </div>
-  </div>
-  
-  <div class="mt-12 flex justify-center">
-    {% if profile.profile_pic %}
-      <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" 
-           class="rounded-full w-40 h-40 object-cover border-4 border-indigo-600 shadow-md" />
-    {% else %}
-      <p class="text-gray-400 italic text-center">No profile picture uploaded.</p>
-    {% endif %}
   </div>
 
   <div class="mt-12 flex justify-center space-x-6">
@@ -44,7 +47,7 @@
        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition">
        ✏️ Edit Profile
     </a>
-    <a href="{% url 'home' %}" 
+    <a href="{% url 'home' %}"
        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg font-semibold transition">
        ⬅ Back to Home
     </a>

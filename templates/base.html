@@ -1,35 +1,89 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}My Courses{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: url("/media/bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        .dark body {
+            background: none;
+            background-color: #111827;
+        }
+        .theme-toggle {
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="relative font-sans flex flex-col min-h-screen text-gray-800 bg-white transition-all duration-300 dark:bg-gray-900 dark:text-white">
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-30 z-0 pointer-events-none"></div>
 
     <!-- Navbar -->
-    <header class="bg-blue-600 text-white shadow">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-semibold">Course Portal</h1>
-            <nav>
-                <a href="{% url 'home' %}" class="hover:underline mr-4">Home</a>
-                <a href="{% url 'course_list' %}" class="hover:underline">Courses</a>
-            </nav>
+    <header class="relative z-10 bg-blue-800 text-white shadow-md dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 pt-4 pb-1 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wide">🏫 MyCampusConnect</h1>
+            <div class="flex items-center gap-4">
+                <nav>
+                    <a href="{% url 'home' %}" class="hover:underline mr-4">Home</a>
+                    <a href="{% url 'course_list' %}" class="hover:underline mr-4">Courses</a>
+                    {% if user.is_authenticated %}
+                        {% if user.userprofile.role == 'teacher' %}
+                            <a href="{% url 'create_course' %}" class="hover:underline mr-4">➕ Create Course</a>
+                            <a href="{% url 'teacher_panel' %}" class="hover:underline mr-4">👨‍🏫 Teacher Panel</a>
+                        {% elif user.userprofile.role == 'student' %}
+                            <span class="mr-4">👨‍🎓 {{ user.username }}</span>
+                        {% endif %}
+                        <a href="{% url 'profile' %}" class="hover:underline mr-4">👤 Profile</a>
+                        <form method="post" action="{% url 'logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="hover:underline text-red-300">🚪 Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="hover:underline mr-4">🔐 Login</a>
+                        <a href="{% url 'register' %}" class="hover:underline">📝 Register</a>
+                    {% endif %}
+                </nav>
+                <span id="themeToggle" class="theme-toggle text-xl hover:text-yellow-400 transition duration-300">🌙</span>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="min-h-screen">
-        {% block content %}
-        {% endblock %}
+    <!-- Main Section -->
+    <main class="relative z-10 flex-grow flex items-start justify-center pt-6 px-4">
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-100 text-center py-4 mt-8 text-sm text-gray-500">
-        &copy; {{ now|date:"Y" }} My Course Portal. All rights reserved.
+    <footer class="relative z-10 bg-gray-900 text-gray-300 text-center py-4 text-sm dark:bg-black dark:text-gray-400">
+        &copy; {{ now|date:"Y" }} <strong>MyCampusConnect</strong>. All rights reserved.
     </footer>
-    
+
+    <!-- Global Theme Toggle Script -->
+    <script>
+        const toggleBtn = document.getElementById("themeToggle");
+        const htmlTag = document.documentElement;
+        if (localStorage.getItem("theme") === "dark") {
+            htmlTag.classList.add("dark");
+            toggleBtn.textContent = "☀️";
+        }
+        toggleBtn.addEventListener("click", () => {
+            htmlTag.classList.toggle("dark");
+            const isDark = htmlTag.classList.contains("dark");
+            toggleBtn.textContent = isDark ? "☀️" : "🌙";
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+        });
+    </script>
 </body>
 </html>

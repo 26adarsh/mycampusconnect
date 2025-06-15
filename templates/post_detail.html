@@ -27,8 +27,8 @@
 
   <form method="post" action="{% url 'add_comment' post.id %}" class="space-y-4">
     {% csrf_token %}
-    <textarea name="comment" rows="4" placeholder="Write a comment..." 
-      class="w-full p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+    {{ form.as_p }}
+
     <button type="submit" 
       class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-semibold transition">
       💬 Post Comment

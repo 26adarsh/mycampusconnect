@@ -3,6 +3,12 @@ from django.contrib.auth import views as auth_views
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import api_views  # your DRF-based views
+from .views import CreateCourseView
+from django.views.generic import TemplateView
+
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 router = DefaultRouter()
 router.register(r'api/courses', api_views.CourseViewSet)
@@ -22,6 +28,8 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('profile/edit/', views.EditProfileView.as_view(), name='edit_profile'),
 
+    path('courses/create/', CreateCourseView.as_view(), name='create_course'),
+
     path('courses/', views.CourseListView.as_view(), name='course_list'),
     path('courses/enroll/<int:course_id>/', views.EnrollCourseView.as_view(), name='enroll_course'),
     path('courses/unenroll/<int:course_id>/', views.UnenrollCourseView.as_view(), name='unenroll_course'),
@@ -29,6 +37,8 @@ urlpatterns = [
     path('announcements/', views.AnnouncementsView.as_view(), name='announcements'),
     path('announcements/<int:post_id>/', views.PostDetailView.as_view(), name='post_detail'),
     path('announcements/<int:post_id>/comment/', views.AddCommentView.as_view(), name='add_comment'),
+
+    path('not-authorized/', TemplateView.as_view(template_name='not_authorized.html'), name='not_authorized'),
 
     path('chat/', views.ChatView.as_view(), name='chat'),
     path('chat/get/', views.GetMessagesView.as_view(), name='get_messages'),
@@ -45,4 +55,4 @@ urlpatterns = [
     # JWT Token Auth
     path('api/token/', api_views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', api_views.MyTokenRefreshView.as_view(), name='token_refresh'),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

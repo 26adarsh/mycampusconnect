@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-xl mx-auto py-10 px-6 bg-white shadow-md rounded-xl">
+    <h2 class="text-2xl font-bold text-center mb-6">📝 Create New Course</h2>
+
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+
+        <div>
+            <label for="{{ form.code.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-700">
+                Course Code
+            </label>
+            {{ form.code }}
+            {% if form.code.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.code.errors|striptags }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.name.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-700">
+                Course Name
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.name.errors|striptags }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.description.id_for_label }}" class="block mb-2 text-sm font-medium text-gray-700">
+                Description
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.description.errors|striptags }}</p>
+            {% endif %}
+        </div>
+
+        <div class="text-center mt-6">
+            <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition">
+                Create Course
+            </button>
+        </div>
+    </form>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'course_list' %}" class="text-blue-500 hover:underline">⬅ Back to Course List</a>
+    </div>
+</div>
+{% endblock %}

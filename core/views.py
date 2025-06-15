@@ -1,48 +1,69 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.views.generic import TemplateView, FormView, ListView, DetailView
+from django.views.generic import TemplateView, FormView, ListView, DetailView, CreateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
+from django.db.models import Q
+from django.urls import reverse
 from .models import UserProfile, Course, Post, Comment, ChatMessage
-from .forms import PostForm
+from .forms import PostForm, UserProfileForm, CourseForm
 from django.contrib.auth.models import User
-
 
 # Basic
 class HomeView(TemplateView):
     template_name = 'home.html'
 
-# Registration
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.views import View
+from .models import UserProfile  # make sure this import is correct
+
 class RegisterView(View):
     def get(self, request):
         return render(request, 'register.html')
 
     def post(self, request):
-        username = request.POST['username']
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
-        role = request.POST['role']
-        roll_no = request.POST['roll_no']
-        department = request.POST['department']
-        profile_pic = request.FILES.get('profile_pic')
-
-        if password1 != password2:
-            return render(request, 'register.html', {'error': 'Passwords do not match'})
-
         try:
-            user = User.objects.create_user(username=username, password=password1)
-        except:
-            return render(request, 'register.html', {'error': 'Username already exists'})
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            password1 = request.POST.get('password1')
+            password2 = request.POST.get('password2')
+            role = request.POST.get('role')
+            roll_no = request.POST.get('roll_no')
+            department = request.POST.get('department')
+            profile_pic = request.FILES.get('profile_pic')
 
-        profile, created = UserProfile.objects.get_or_create(user=user)
-        profile.role = role
-        profile.roll_no = roll_no
-        profile.department = department
-        profile.profile_pic = profile_pic
-        profile.save()
+            if not username or not email or not password1 or not password2:
+                return render(request, 'register.html', {'error': "All fields are required."})
 
-        return redirect('login')
+            if password1 != password2:
+                return render(request, 'register.html', {'error': "Passwords do not match."})
+
+            if User.objects.filter(username=username).exists():
+                return render(request, 'register.html', {'error': "Username already exists."})
+
+            # Create user
+            user = User.objects.create_user(username=username, email=email, password=password1)
+
+            # Create profile
+            profile = UserProfile.objects.create(
+                user=user,
+                role=role,
+                roll_no=roll_no,
+                department=department,
+                profile_pic=profile_pic
+            )
+
+            login(request, user)
+            return redirect('home')
+
+        except Exception as e:
+            print("REGISTER ERROR:", e)
+            return render(request, 'register.html', {'error': str(e)})
+
+
 
 # Profile
 class ProfileView(LoginRequiredMixin, TemplateView):
@@ -50,12 +71,9 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        profile, created = StudentProfile.objects.get_or_create(user=self.request.user)
+        profile, created = UserProfile.objects.get_or_create(user=self.request.user)
         context['profile'] = profile
         return context
-
-from .models import UserProfile  # Make sure this import is correct
-from .forms import UserProfileForm  # Updated form name
 
 class EditProfileView(LoginRequiredMixin, View):
     def get(self, request):
@@ -70,7 +88,6 @@ class EditProfileView(LoginRequiredMixin, View):
             form.save()
             return redirect('profile')
         return render(request, 'edit_profile.html', {'form': form})
-
 
 # Courses
 class CourseListView(LoginRequiredMixin, View):
@@ -100,12 +117,35 @@ class UnenrollCourseView(LoginRequiredMixin, View):
         course.students.remove(request.user)
         return redirect('course_list')
 
+from django.utils.decorators import method_decorator
+from .decorators import teacher_required, student_required
+
+@method_decorator(teacher_required, name='dispatch')
+class CreateCourseView(LoginRequiredMixin, CreateView):
+    model = Course
+    form_class = CourseForm
+    template_name = 'create_course.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.userprofile.role != 'teacher':
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('course_list')
+
 # Announcements
 class AnnouncementsView(LoginRequiredMixin, ListView):
     model = Post
     template_name = 'announcements.html'
     context_object_name = 'posts'
     ordering = ['-created_at']
+
+from .forms import CommentForm
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
@@ -115,15 +155,23 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['comments'] = self.object.comments.all()
+        context['form'] = CommentForm()  # <-- Add this line
         return context
+
+
+from .forms import CommentForm
 
 class AddCommentView(LoginRequiredMixin, View):
     def post(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
-        text = request.POST.get('comment')
-        if text:
-            Comment.objects.create(post=post, author=request.user, text=text)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
         return redirect('post_detail', post_id=post_id)
+
 
 # Chat
 class ChatView(LoginRequiredMixin, TemplateView):
@@ -155,7 +203,7 @@ class TeacherPanelView(LoginRequiredMixin, View):
         if profile.role != 'teacher':
             return redirect('home')
         form = PostForm()
-        students = UserProfile.objects.filter(role='student')  # ✅ updated
+        students = UserProfile.objects.filter(role='student')
         posts = Post.objects.filter(author=request.user).order_by('-created_at')
         return render(request, 'teacher_panel.html', {
             'form': form,

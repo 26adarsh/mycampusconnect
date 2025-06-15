@@ -1,53 +1,66 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-    <h2 class="text-3xl font-bold text-center mb-6">💬 Live Chat</h2>
+<div class="w-full max-w-4xl mx-auto mt-6 px-4">
+  <h2 class="text-3xl font-bold mb-4 text-center">💬 Live Chat</h2>
 
-    <div id="chat-box" class="border border-gray-300 rounded-md h-72 overflow-y-scroll p-4 bg-white shadow-inner mb-4"></div>
+  <div id="chat-box" class="h-[400px] overflow-y-auto px-4 py-3 bg-white dark:bg-gray-800 border rounded-lg shadow-inner space-y-2 scroll-smooth">
+    <!-- Messages will load here -->
+  </div>
 
-    <form id="chat-form" class="flex items-center space-x-2">
-        {% csrf_token %}
-        <input type="text" id="chat-message" placeholder="Type a message..."
-            class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button type="submit"
-            class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-            Send
-        </button>
-    </form>
+  <form id="chat-form" class="flex items-center gap-3 mt-4">
+    {% csrf_token %}
+    <input type="text" id="chat-message" placeholder="Type a message..."
+      class="flex-grow px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black dark:text-white"
+    />
+    <button type="submit"
+      class="px-5 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 shadow">
+      ➤
+    </button>
+  </form>
 
-    <div class="text-center mt-8">
-        <a href="{% url 'home' %}" class="text-blue-600 hover:underline">⬅ Back to Home</a>
-    </div>
+  <div class="text-center mt-6">
+    <a href="{% url 'home' %}" class="text-blue-600 dark:text-blue-400 hover:underline">⬅ Back to Home</a>
+  </div>
 </div>
 
-<!-- jQuery + Auto-refresh script -->
+<!-- jQuery and Script -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function fetchMessages() {
-        $.get("{% url 'get_messages' %}", function(data) {
-            let box = $('#chat-box');
-            box.html('');
-            data.forEach(msg => {
-                box.append(`<p><strong>${msg.sender}</strong>: ${msg.message} <span class="text-xs text-gray-500">(${msg.timestamp})</span></p>`);
-            });
-            box.scrollTop(box[0].scrollHeight);
-        });
-    }
-
-    fetchMessages();
-    setInterval(fetchMessages, 3000);  // refresh every 3 sec
-
-    $('#chat-form').submit(function(e) {
-        e.preventDefault();
-        let message = $('#chat-message').val();
-        $.post("{% url 'send_message' %}", {
-            'message': message,
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-        }, function() {
-            $('#chat-message').val('');
-            fetchMessages();
-        });
+  function fetchMessages() {
+    $.get("{% url 'get_messages' %}", function(data) {
+      let box = $('#chat-box');
+      box.html('');
+      data.forEach(msg => {
+        const isUser = msg.sender === "{{ request.user.username }}";
+        const bubble = `
+          <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow 
+              ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'}">
+              <div class="text-sm font-medium">${isUser ? 'You' : msg.sender}</div>
+              <div class="text-sm mt-1">${msg.message}</div>
+              <div class="text-xs mt-1 text-right opacity-60">${msg.timestamp}</div>
+            </div>
+          </div>`;
+        box.append(bubble);
+      });
+      box.scrollTop(box[0].scrollHeight);
     });
+  }
+
+  fetchMessages();
+  setInterval(fetchMessages, 3000);
+
+  $('#chat-form').submit(function(e) {
+    e.preventDefault();
+    let message = $('#chat-message').val();
+    if (!message.trim()) return;
+    $.post("{% url 'send_message' %}", {
+      'message': message,
+      'csrfmiddlewaretoken': '{{ csrf_token }}'
+    }, function() {
+      $('#chat-message').val('');
+      fetchMessages();
+    });
+  });
 </script>
 {% endblock %}
