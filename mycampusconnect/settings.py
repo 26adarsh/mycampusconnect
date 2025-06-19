@@ -25,7 +25,13 @@ SECRET_KEY = 'django-insecure-nz9h8z1*h6+ao!zcb!@==c1ni)=9h#04dqmx5^tv8q73v!7058
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+import os
+
+ALLOWED_HOSTS = [
+    'mycampusconnectportal.onrender.com',
+    os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+]
+
 
 
 # Application definition
